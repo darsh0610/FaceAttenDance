@@ -12,14 +12,19 @@ Run:
 Press 'q' to quit the webcam window.
 """
 
+import os
 import cv2
 
+def get_face_cascade():
+    cascade_path = os.path.join(os.path.dirname(__file__), "haarcascade_frontalface_default.xml")
+    if os.path.exists(cascade_path):
+        return cv2.CascadeClassifier(cascade_path)
+    if hasattr(cv2, "data") and hasattr(cv2.data, "haarcascades"):
+        return cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+    return cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+
 def main():
-    # Load OpenCV's pre-trained Haar Cascade model for frontal face detection.
-    # This ships with opencv-python, so no separate download is needed.
-    face_cascade = cv2.CascadeClassifier(
-        cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-    )
+    face_cascade = get_face_cascade()
 
     # 0 = default webcam. Change to 1, 2... if you have multiple cameras.
     cap = cv2.VideoCapture(0)

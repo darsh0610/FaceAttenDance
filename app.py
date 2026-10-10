@@ -69,6 +69,17 @@ def mark_attendance(name):
     return True, f"Attendance marked for {name} at {now.strftime('%H:%M:%S')}"
 
 
+CASCADE_PATH = os.path.join(os.path.dirname(__file__), "haarcascade_frontalface_default.xml")
+
+
+def get_face_cascade():
+    if os.path.exists(CASCADE_PATH):
+        return cv2.CascadeClassifier(CASCADE_PATH)
+    if hasattr(cv2, "data") and hasattr(cv2.data, "haarcascades"):
+        return cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+    return cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+
+
 # --- Face Representation (Hybrid: face_recognition or OpenCV fallback) ---
 
 def extract_face_vector(image_np):
@@ -84,9 +95,7 @@ def extract_face_vector(image_np):
     else:
         # Fallback: Haar Cascade + normalized 128-bin multi-channel representation
         gray = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
-        face_cascade = cv2.CascadeClassifier(
-            cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-        )
+        face_cascade = get_face_cascade()
         faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60))
         locations = []
         encodings = []
@@ -256,7 +265,7 @@ with tabs[0]:
         if image_to_detect is not None:
             img_np = np.array(image_to_detect.convert("RGB"))
             gray = cv2.cvtColor(img_np, cv2.COLOR_RGB2GRAY)
-            face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+            face_cascade = get_face_cascade()
             faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60))
 
             display_img = img_np.copy()

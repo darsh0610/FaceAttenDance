@@ -44,10 +44,13 @@ def get_face_encoding(image_path):
         img_bgr = cv2.imread(image_path)
         if img_bgr is None:
             return []
-        gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY)
-        face_cascade = cv2.CascadeClassifier(
-            cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-        )
+        cascade_path = os.path.join(os.path.dirname(__file__), "haarcascade_frontalface_default.xml")
+        if os.path.exists(cascade_path):
+            face_cascade = cv2.CascadeClassifier(cascade_path)
+        elif hasattr(cv2, "data") and hasattr(cv2.data, "haarcascades"):
+            face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+        else:
+            face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
         faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(60, 60))
         if len(faces) == 0:
             return []

@@ -47,10 +47,13 @@ def detect_and_encode(frame_bgr):
         encodings = face_recognition.face_encodings(rgb_small, locations)
         return locations, encodings
     else:
-        gray = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
-        face_cascade = cv2.CascadeClassifier(
-            cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-        )
+        cascade_path = os.path.join(os.path.dirname(__file__), "haarcascade_frontalface_default.xml")
+        if os.path.exists(cascade_path):
+            face_cascade = cv2.CascadeClassifier(cascade_path)
+        elif hasattr(cv2, "data") and hasattr(cv2.data, "haarcascades"):
+            face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+        else:
+            face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
         faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(50, 50))
         locations = []
         encodings = []
